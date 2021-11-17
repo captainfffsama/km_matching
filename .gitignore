@@ -1,0 +1,20 @@
+# create by https://github.com/iamcco/coc-gitignore (Wed Nov 17 2021 10:16:37 GMT+0800 (中国标准时间))
+.vscode/
+.cache/
+build/
+# CMake.gitignore:
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# CMake.patch:
+# External projects
+*-prefix/
