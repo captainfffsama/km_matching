@@ -1,29 +1,38 @@
 #include <algorithm>
 #include <iostream>
-#include <opencv2/core/types.hpp>
 #include "hungarian.hpp"
+#include "object_match.hpp"
+#include "debug.hpp"
 
+using object_match::ObjInfo;
 
 int main()
 {
-    auto hungarianSolver=hungarian::Hungarian();
-    // cv::Mat testMat=(Mat_<float> (4,4) <<0, 1, 2, 3,0, 1, 2, 3,1, 2, 0, 3,1, 2, 3, 4);
+    std::vector<ObjInfo> objas {{"d",{10,10,20,20}},
+                                {"d",{40,40,60,60}},
+                                {"c",{40,40,60,60}},
+                                {"d",{80,80,90,90}}};
+    std::vector<ObjInfo> objbs {
+                                {"d",{80,80,90,90}},
+                               {"c",{10,10,20,20}}, };
+    
+    object_match::ObjectMatcher solver;
+    std::vector<int> nomath;
+    std::vector<std::pair<int,int>> result;
+    int flag=solver.MatchObject(objas,objbs,result,nomath);
 
-    cv::Mat testMat=(Mat_<float> (4,4) <<10, 19, 8, 15, 10, 18, 7, 17, 13, 16, 9, 14,12, 19, 8, 18);
+    std::cout<<"flag:"<<flag<<std::endl;
+    std::cout<<"match result"<<std::endl;
 
-    std::cout<<"test mat is:\n"<<testMat<<std::endl;
-    std::map<int,int> match;
-    auto cost=hungarianSolver.Solve(testMat,match);
+    debug::showPairVec(result);
+    
+    std::cout<<"========\n"<<"no match idx"<<std::endl;
 
-    for(auto it= match.begin();it!=match.end();it++)
+    for(auto it=nomath.begin();it!=nomath.end();it++)
     {
-        std::cout<<"["<<(*it).first<<","<<(*it).second<<"]  ";
+        std::cout<<(*it)<<", ";
     }
-    std::cout<<std::endl;
-
-    std::cout<<"cost is:"<<cost<<std::endl;
-
-
-
+    std::cout<<"\n=========="<<std::endl;
+    
     return 0;
 }

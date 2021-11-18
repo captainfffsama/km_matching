@@ -15,23 +15,14 @@ endif()
 
 project(hungarian_opencv)
 set(SOURCES
-    # src/test_main.cpp
+    src/test_main.cpp
     src/hungarian.cpp
-    src/hungarian_test.cpp
+    # src/hungarian_test.cpp
     src/debug.cpp
+    src/object_match.cpp
 )
 
-set(3RD
-    /home/chiebotgpuhq/MyCode/3rd
-)
-
-set(OpenCV_DIR ${3RD}/opencv/4.5.4_contrib/)
-message("${OpenCV_VERSION}")
-find_package(OpenCV CONFIG REQUIRED)
 add_executable(hungarian_opencv ${SOURCES})
 
-target_include_directories(hungarian_opencv PRIVATE ${OpenCV_INCLUDE_DIRS} "./include")
-message("${OpenCV_INCLUDE_DIRS}")
-target_link_libraries(hungarian_opencv PRIVATE ${OpenCV_LIBS})
+target_include_directories(hungarian_opencv PRIVATE  "./include")
 
-message("${OpenCV_LIBS}")

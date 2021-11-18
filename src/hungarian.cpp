@@ -1,7 +1,6 @@
 #include "hungarian.hpp"
 #include <cfloat>
 #include <cmath>
-#include "debug.hpp"
 
 namespace hungarian {
 
@@ -10,6 +9,11 @@ float Hungarian::Solve(const std::vector<std::vector<float>> &c_m, std::vector<i
     costMatrix=c_m;
     ptPairNum=costMatrix.size();
     matchResult.clear();
+    if(ptPairNum<1||(c_m[1].size()!=ptPairNum))
+    {
+        std::cout<<"ERROR:矩阵不符合要求,可能不是方阵"<<std::endl;
+        return 0;
+    }
     xpts.clear();
     ypts.clear();
     for(auto i=0;i<ptPairNum;++i)
@@ -19,7 +23,7 @@ float Hungarian::Solve(const std::vector<std::vector<float>> &c_m, std::vector<i
         matchResult.push_back(0);
     }
     InitVertexWeight();
-
+    
     for(int x_idx=0;x_idx<ptPairNum;x_idx++)
     {        
         while(true)
@@ -96,7 +100,7 @@ bool Hungarian::DFS(int x_idx)
     {
         if(!ypts[i].isVisit)
         {
-            if((xpts[x_idx].weight+ypts[i].weight)==costMatrix[xpts[x_idx].idx][ypts[i].idx])
+            if(std::abs((xpts[x_idx].weight+ypts[i].weight)-costMatrix[xpts[x_idx].idx][ypts[i].idx])<0.01)
             {
                 ypts[i].isVisit=true;
                 if(-1==ypts[i].matchPointIdx|| DFS(ypts[i].matchPointIdx))

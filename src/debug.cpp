@@ -1,30 +1,7 @@
 #include "debug.hpp"
-namespace debug{
-void showLineInfo(const std::map<int,std::set<int>>& linesInfo)
-{
-    std::cout<<"{---"<<std::endl;;
-    for(auto map_it=linesInfo.begin();map_it!=linesInfo.end();map_it++)
-    {
-        std::cout<<(*map_it).first<<" : ";
-        std::cout<<"[";
-        for(auto v_it=(*map_it).second.begin();v_it!=(*map_it).second.end();v_it++)
-        {
-            std::cout<<*v_it<<" ";
-        }
-        std::cout<<"]"<<std::endl;;
-    }
-    std::cout<<"---}"<<std::endl;
-}
+#include <iomanip>
 
-void showSet(const std::set<int>& a)
-{
-    std::cout<<"{";
-    for(auto it=a.begin();it!=a.end();it++)
-    {
-        std::cout<<*it<<" ";
-    }
-    std::cout<<"}"<<std::endl;
-}
+namespace debug{
 
 void showMatchingResult(const std::vector<int>& a)
 {
@@ -38,5 +15,28 @@ void showMatchingResult(const std::vector<int>& a)
 void showPointInfo(const hungarian::PointInfo& ptinfo)
 {
     std::cout<<"("<<ptinfo.isVisit<<","<<ptinfo.weight<<","<<ptinfo.matchPointIdx<<","<<ptinfo.idx<<")"<<std::endl;
+}
+
+void showMatrix(const hungarian::Flt2DMatrix &matrix)
+{
+    for(auto row=matrix.begin();row!=matrix.end();row++)
+    {
+        std::cout<<"{";
+        for(auto col=(*row).begin();col!=(*row).end();col++)
+        {
+            std::cout<<std::setw(9)<<(*col);
+            std::cout<<",";
+        }
+        std::cout<<"}"<<std::endl;
+    }
+}
+
+void showPairVec(const std::vector<std::pair<int, int>> &a)
+{
+    for(auto& it:a)
+    {
+        std::cout<<"("<<it.first<<","<<it.second<<")"<<"  ";
+    }
+    std::cout<<std::endl;
 }
 }
