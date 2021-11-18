@@ -1,317 +1,121 @@
 #include "hungarian.hpp"
+#include <cfloat>
 #include <cmath>
-#include <iostream>
-#include <opencv2/imgproc.hpp>
+#include "debug.hpp"
 
 namespace hungarian {
-float Hungarian::Solve(Mat& costMatrix, std::map<int,int>& matchResult)
+
+float Hungarian::Solve(const std::vector<std::vector<float>> &c_m, std::vector<int> &matchResult)
 {
-    Mat dealCostMatrix=costMatrix.clone();
-    dealCostMatrix.convertTo(dealCostMatrix, CV_32F);
-    PreprocessCostMatrix(dealCostMatrix);
-    std::set<int> hLines,vLines;
-    FindCoverLine(dealCostMatrix,hLines,vLines);
-    while((hLines.size()+vLines.size())<dealCostMatrix.rows)
-    {
-        // FixMatrix
-        FixMatrix(dealCostMatrix,hLines,vLines);
-        FindCoverLine(dealCostMatrix,hLines,vLines);
-    }
-    // Final
-    debug::showSet(hLines);
-    debug::showSet(vLines);
-
-    std::cout<<dealCostMatrix<<std::endl;
-    getMatch(dealCostMatrix,matchResult);
-    float cost=getCost(costMatrix,matchResult);
-    return cost;
-} 
-
-void Hungarian::PreprocessCostMatrix(Mat& matrix)
-{
-    int rowNum {matrix.rows};
-    int colNum {matrix.cols};
-    std::vector<float> eachRowMin (rowNum,HUGE_VALF);
-    std::vector<float> eachColMin (colNum,HUGE_VALF);
-
-    for(int i=0;i<rowNum;i++)
-    {
-        float* rowDataPtr=matrix.ptr<float> (i);
-        for(int j=0;j<colNum;j++)
-        {
-            if(rowDataPtr[j]<eachRowMin[i])
-            {
-                eachRowMin[i]=rowDataPtr[j];
-            }
-        }
-    }
-
-    for(int i=0;i<rowNum;i++)
-    {
-        float* rowDataPtr=matrix.ptr<float> (i);
-        for(int j=0;j<colNum;j++)
-        {
-            rowDataPtr[j]-=eachRowMin[i];
-            if(rowDataPtr[j]<eachColMin[j])
-            {
-                eachColMin[j]=rowDataPtr[j];
-            }
-        }
-    }
-
-    for(int i=0;i<rowNum;i++)
-    {
-        float* rowDataPtr=matrix.ptr<float> (i);
-        for(int j=0;j<colNum;j++)
-        {
-            rowDataPtr[j]-=eachColMin[j];
-        }
-    }
-}
-
-void Hungarian::FindCoverLine(Mat& matrix,std::set<int>& skipRow,std::set<int>& skipCol)
-{
-    int rowNum {matrix.rows};
-    int colNum {matrix.cols};
-
-    // int 负表示横线,正表述竖线,数值是索引
-    // set表示哪些列或者行是零值
-    // 注意这里存的数值索引是从1开始的
-    std::map<int,std::set<int>> linesInfo;
-
-    skipCol.clear();
-    skipRow.clear();
-
-    for(int i=0;i<rowNum;i++)
-    {
-        float* rowDataPtr=matrix.ptr<float> (i);
-        for(int j=0;j<colNum;j++)
-        {
-            // 当前行遍历第一次发现0,然后遍历下所在的行列,确定选哪条线覆盖
-            if(0.0==rowDataPtr[j])
-            {
-                addLineInfo(j+1,i+1,linesInfo);
-                addLineInfo(-(i+1),j+1,linesInfo);
-            }
-        }
-    }
-
-    while(!linesInfo.empty())
-    {
-        int maxLineNum {0};
-        int linesIdx {0};
-        std::vector<int> emptyLine;
-        for(auto it=linesInfo.begin();it!=linesInfo.end();it++)
-        {
-            if((*it).second.size()>maxLineNum)
-            {
-                maxLineNum=(*it).second.size();
-                linesIdx=(*it).first;
-            }
-        }
-
-        std::cout<<"linesIdx:"<<linesIdx<<std::endl;
-        debug::showLineInfo(linesInfo);
-        if(linesIdx<0)
-        {
-            skipRow.insert((-linesIdx)-1);
-        }
-        else
-        {skipCol.insert(linesIdx-1);}
-        auto needDelpt=linesInfo[linesIdx];
-        linesInfo.erase(linesIdx);
-
-        //fix linesinfo
-        for(auto it=linesInfo.begin();it!=linesInfo.end();it++)
-        {
-            auto idx=(*it).first;
-            if(linesIdx * idx<0)
-            {
-                auto rmIdx=linesIdx>0?linesIdx:-linesIdx;
-                (*it).second.erase(rmIdx);
-            }
-            if((*it).second.size()==0)
-            {
-                emptyLine.push_back((*it).first);
-            }
-        }
-        for(auto it=emptyLine.begin();it!=emptyLine.end();it++)
-        {
-            linesInfo.erase(*it);
-        }
-    }
-}
-
-void Hungarian::FixMatrix(Mat& matrix,const std::set<int>& hLines,const std::set<int>& vLines)
-{
-    //确定交点
-    std::vector<ZeroPoint> crossPoints;
-    for(auto i=hLines.begin();i!=hLines.end();i++)
-    {
-        for(auto j=vLines.begin();j!=vLines.end();j++)
-        {
-            ZeroPoint tmp_pt (*i,*j);
-            crossPoints.push_back(tmp_pt);
-        }
-    }
-    float minValue=HUGE_VALF;
-    //找最小
-    for(auto i=0;i<matrix.rows;i++)
-    {
-        if(isInSet(i,hLines))
-        {
-            continue;}
-        float* data=matrix.ptr<float> (i);
-        for(auto j=0;j<matrix.cols;j++)
-        {
-            if(isInSet(j, vLines))
-            {continue;}
-            if(minValue>data[j])
-            {
-                minValue=data[j];
-            }
-
-        }
-    }
-
-    for(auto i=0;i<matrix.rows;i++)
-    {
-        if(isInSet(i,hLines))
-        {continue;}
-        float* data=matrix.ptr<float> (i);
-        for(auto j=0;j<matrix.cols;j++)
-        {
-            if(isInSet(j, vLines))
-            {continue;}
-            data[j] -= minValue;
-        }
-    }
-
-    for(auto i=crossPoints.begin();i!=crossPoints.end();i++)
-    {
-        matrix.at<float> ((*i).first,(*i).second) +=minValue;
-    }
-}
-
-// FIXME::这里计算有问题
-void Hungarian::getMatch(Mat& matrix,std::map<int,int>& matchResult)
-{
-    int rowNum {matrix.rows};
-    int colNum {matrix.cols};
-
+    costMatrix=c_m;
+    ptPairNum=costMatrix.size();
     matchResult.clear();
-
-    // int 负表示横线,正表述竖线,数值是索引
-    // set表示哪些列或者行是零值
-    // 注意这里存的数值索引是从1开始的
-    std::map<int,std::set<int>> linesInfo;
-
-    for(int i=0;i<rowNum;i++)
+    xpts.clear();
+    ypts.clear();
+    for(auto i=0;i<ptPairNum;++i)
     {
-        float* rowDataPtr=matrix.ptr<float> (i);
-        for(int j=0;j<colNum;j++)
+        xpts.push_back(PointInfo());
+        ypts.push_back(PointInfo());
+        matchResult.push_back(0);
+    }
+    InitVertexWeight();
+
+    for(int x_idx=0;x_idx<ptPairNum;x_idx++)
+    {        
+        while(true)
         {
-            // 当前行遍历第一次发现0,然后遍历下所在的行列,确定选哪条线覆盖
-            if(0.0==rowDataPtr[j])
+            clearPointsVisitFlag(xpts);
+            clearPointsVisitFlag(ypts);
+
+            if(DFS(x_idx))
+            {break;}
+
+            float d {FLT_MAX};
+            for(auto xit=xpts.begin();xit!=xpts.end();++xit)
             {
-                addLineInfo(j+1,i+1,linesInfo);
-                addLineInfo(-(i+1),j+1,linesInfo);
+                if((*xit).isVisit)
+                {
+                    for(auto yit=ypts.begin();yit!=ypts.end();++yit)
+                    {
+                        if(!(*yit).isVisit)
+                        {
+                            d=std::min(d,(*xit).weight+(*yit).weight-costMatrix[(*xit).idx][(*yit).idx]);
+                        }
+                    }
+                }
+            }
+
+            if(FLT_MAX==d)
+            {return FLT_MAX;}
+
+            for(auto xit=xpts.begin();xit!=xpts.end();++xit)
+            {
+                // 在树内
+                if((*xit).isVisit)
+                {(*xit).weight -= d;}
+            }
+            for(auto yit=ypts.begin();yit!=ypts.end();++yit)
+            {
+                // 在树内
+                if((*yit).isVisit)
+                {(*yit).weight += d;}
             }
         }
     }
 
-    while(!linesInfo.empty())
+    float totalCost {0};
+    for(auto xit=xpts.begin();xit!=xpts.end();++xit)
     {
-        int minLineNum {INT_MAX};
-        int linesIdx {0};
-        std::vector<int> emptyLine;
-        for(auto it=linesInfo.begin();it!=linesInfo.end();it++)
-        {
-            if((*it).second.size()<minLineNum)
-            {
-                minLineNum=(*it).second.size();
-                linesIdx=(*it).first;
-            }
-        }
-
-        // 确定点
-        auto pt_idx=*(linesInfo[linesIdx].begin());
-        // std::cout<<"current lineInfo"<<std::endl;
-        // 
-        // for(auto it=linesInfo[linesIdx].begin();it!=linesInfo[linesIdx].end();it++)
-        // {
-        //     std::cout<<*it<<" ";
-        // }
-        // std::cout<<"\n=============================="<<std::endl;
-        // linesIdx <0 表示存的行信息,pt_idx 此时表示列上的0的位置
-        pt_idx= linesIdx<0 ? pt_idx:-pt_idx;
-        // std::cout<<linesIdx<<pt_idx<<std::endl;
-        auto NeedDelpt1=linesInfo[linesIdx];
-        auto NeedDelpt2=linesInfo[pt_idx];
-
-        auto ptRowIdx= linesIdx<0 ? linesIdx: pt_idx;
-        ptRowIdx=-ptRowIdx-1;
-        auto ptColIdx=linesIdx>0 ? linesIdx: pt_idx;
-        ptColIdx=ptColIdx-1;
-
-        // std::cout<<"DEBUG  "<<ptRowIdx<<" "<<ptColIdx<<std::endl;
-        
-        matchResult[ptRowIdx]=ptColIdx;
-
-        linesInfo.erase(linesIdx);
-        linesInfo.erase(pt_idx);
-
-        //fix linesinfo
-        for(auto it=linesInfo.begin();it!=linesInfo.end();it++)
-        {
-            auto idx=(*it).first;
-            if(linesIdx * idx<0)
-            {
-                auto rmIdx=linesIdx>0?linesIdx:-linesIdx;
-                (*it).second.erase(rmIdx);
-            }
-            if(pt_idx*idx<0)
-            {
-                auto rmIdx=pt_idx>0?pt_idx:-pt_idx;
-                (*it).second.erase(rmIdx);
-            }
-            if((*it).second.size()==0)
-            {
-                emptyLine.push_back((*it).first);
-            }
-        }
-        for(auto it=emptyLine.begin();it!=emptyLine.end();it++)
-        {
-            linesInfo.erase(*it);
-        }
+        totalCost+=costMatrix[(*xit).idx][(*xit).matchPointIdx];
+        matchResult[(*xit).idx]=(*xit).matchPointIdx;
     }
-
-
+    return totalCost;
 }
 
-float Hungarian::getCost(const Mat& matrix,const std::map<int,int>& matchResult)
+void Hungarian::InitVertexWeight()
 {
-    float cost {0};
-    for(auto it=matchResult.begin();it!=matchResult.end();it++)
+    for(int i=0;i<ptPairNum;++i)
     {
-        cost += matrix.at<float> ((*it).first,(*it).second);
+        float maxWeight {FLT_MIN};
+        for(int j=0;j<ptPairNum;++j)
+        {
+            maxWeight=std::max(maxWeight,costMatrix[i][j]);
+        }
+        xpts[i].weight=maxWeight;
+        xpts[i].idx=i;
+        ypts[i].idx=i;
     }
-    return cost;
+
 }
 
-void addLineInfo(int key,int value_e,std::map<int,std::set<int>>& linesInfo )
+// 深度优先建立交错树
+bool Hungarian::DFS(int x_idx)
 {
-    if(linesInfo.find(key)==linesInfo.end())
+    xpts[x_idx].isVisit=true;
+    for(auto i=0;i<ptPairNum;++i)
     {
-        linesInfo.emplace(key,std::set<int> {value_e});
+        if(!ypts[i].isVisit)
+        {
+            if((xpts[x_idx].weight+ypts[i].weight)==costMatrix[xpts[x_idx].idx][ypts[i].idx])
+            {
+                ypts[i].isVisit=true;
+                if(-1==ypts[i].matchPointIdx|| DFS(ypts[i].matchPointIdx))
+                {
+                    xpts[x_idx].matchPointIdx=ypts[i].idx;
+                    ypts[i].matchPointIdx=xpts[x_idx].idx;
+                    return true;
+                }
+            }
+        }
     }
-    else
-    {
-        linesInfo[key].insert(value_e);
-    }
+    return false;
 }
 
-
+void clearPointsVisitFlag(PointsInfoVec& pts)
+{
+    for(auto it=pts.begin();it!=pts.end();++it)
+    {(*it).isVisit = false;}
+}
 }
 
 

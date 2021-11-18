@@ -18,6 +18,7 @@ set(SOURCES
     # src/test_main.cpp
     src/hungarian.cpp
     src/hungarian_test.cpp
+    src/debug.cpp
 )
 
 set(3RD

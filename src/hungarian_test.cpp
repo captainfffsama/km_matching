@@ -3,26 +3,25 @@
 #include "hungarian.hpp"
 #include "debug.hpp"
 
-
 int main()
 {
     auto hungarianSolver=hungarian::Hungarian();
-    // cv::Mat testMat=(Mat_<float> (4,4) <<0, 4, 0, 2,1, 4, 0, 5,2, 0, 0, 0,2, 4, 0, 5);
-    cv::Mat testMat=(Mat_<float> (4,4)<< 0, 4, 1, 2, 0, 3, 0, 4, 2, 0, 1, 0,  1, 3, 0, 4);
-    std::cout<<"need deal mat: \n"<<testMat<<std::endl;
 
-    std::set<int> vline,hline;
-    hungarianSolver.FindCoverLine(testMat,hline,vline);
-    std::cout<<"find line"<<std::endl;
-    debug::showSet(vline);
-    debug::showSet(hline);
-    hungarianSolver.FixMatrix(testMat,hline,vline);
-    std::cout<<"final result:\n";
-    std::cout<<"v line"<<std::endl;
-    debug::showSet(vline);
-    debug::showSet(hline);
-    std::cout<<testMat<<std::endl;
-    std::cout<<"++++++++++"<<std::endl;
+
+    hungarian::Flt2DMatrix costMatrix = {{10, 19, 8, 15},
+                                         {10, 18, 7, 17},
+                                         {13, 16, 9, 14},
+                                         {12, 19, 8, 18}};
+    // hungarian::Flt2DMatrix costMatrix = {{0, 1, 0, 1},
+    //                                      {1, 0, 0, 1},
+    //                                      {1, 1, 1, 0},
+    //                                      {1, 0, 1, 1}};
+    // 
+    std::vector<int> result;
+    float cost=hungarianSolver.Solve(costMatrix,result);
+    debug::showMatchingResult(result);
+    std::cout<<"cost is:"<<cost<<std::endl;
+    
 
     return 0;
 }

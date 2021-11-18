@@ -9,7 +9,7 @@ int main()
     auto hungarianSolver=hungarian::Hungarian();
     // cv::Mat testMat=(Mat_<float> (4,4) <<0, 1, 2, 3,0, 1, 2, 3,1, 2, 0, 3,1, 2, 3, 4);
 
-    cv::Mat testMat=(Mat_<float> (4,4) <<10, 19, 8, 15,10, 18, 7, 17,13, 16, 9, 14,12, 19, 8, 18);
+    cv::Mat testMat=(Mat_<float> (4,4) <<10, 19, 8, 15, 10, 18, 7, 17, 13, 16, 9, 14,12, 19, 8, 18);
 
     std::cout<<"test mat is:\n"<<testMat<<std::endl;
     std::map<int,int> match;
