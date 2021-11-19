@@ -7,7 +7,7 @@
 namespace debug{
     void showMatchingResult(const std::vector<int>& a);
     void showPointInfo(const hungarian::PointInfo& ptinfo);
-    void showMatrix(const hungarian::Flt2DMatrix& matrix);
+    void showMatrix(const hungarian::Int2DMatrix& matrix);
     void showPairVec(const std::vector<std::pair<int,int>>& a);
 }
 #endif

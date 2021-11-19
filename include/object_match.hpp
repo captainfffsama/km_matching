@@ -23,7 +23,7 @@ public:
 private:
     hungarian::Hungarian matcher;
 
-    void GenerateCostMatrix(const std::vector<ObjInfo>& objsa,const std::vector<ObjInfo>& objsb,const std::pair<int,int>& appendInfo,hungarian::Flt2DMatrix& costMatrix);
+    void GenerateCostMatrix(const std::vector<ObjInfo>& objsa,const std::vector<ObjInfo>& objsb,const std::pair<int,int>& appendInfo,hungarian::Int2DMatrix& costMatrix);
 
     float CountObjCost(const ObjInfo& obj1,const ObjInfo& obj2);
 

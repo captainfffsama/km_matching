@@ -17,7 +17,7 @@ void showPointInfo(const hungarian::PointInfo& ptinfo)
     std::cout<<"("<<ptinfo.isVisit<<","<<ptinfo.weight<<","<<ptinfo.matchPointIdx<<","<<ptinfo.idx<<")"<<std::endl;
 }
 
-void showMatrix(const hungarian::Flt2DMatrix &matrix)
+void showMatrix(const hungarian::Int2DMatrix &matrix)
 {
     for(auto row=matrix.begin();row!=matrix.end();row++)
     {

@@ -1,5 +1,6 @@
 #include "object_match.hpp"
 #include <math.h>
+#include "debug.hpp"
 
 namespace object_match {
 int ObjectMatcher::MatchObject(const std::vector<ObjInfo> &objsA, const std::vector<ObjInfo> &objsB, std::vector<std::pair<int,int>> &A2BMatchResult, std::vector<int> &noMatchObjs)
@@ -24,12 +25,12 @@ int ObjectMatcher::MatchObject(const std::vector<ObjInfo> &objsA, const std::vec
     {appendInfo.first=0;}
     appendInfo.second=a;
 
-    hungarian::Flt2DMatrix costMatrix;
+    hungarian::Int2DMatrix costMatrix;
     GenerateCostMatrix(objsA,objsB,appendInfo,costMatrix);
 
     std::vector<int> kmReuslt;
-    float cost=matcher.Solve(costMatrix,kmReuslt);
-    // debug::showMatrix(costMatrix);
+    int cost=matcher.Solve(costMatrix,kmReuslt);
+    debug::showMatrix(costMatrix);
     
     switch (appendInfo.first) {
         //A 多了
@@ -69,11 +70,11 @@ int ObjectMatcher::MatchObject(const std::vector<ObjInfo> &objsA, const std::vec
     
 };
 
-void ObjectMatcher::GenerateCostMatrix(const std::vector<ObjInfo>& objsa,const std::vector<ObjInfo>& objsb,const std::pair<int,int>& appendInfo,hungarian::Flt2DMatrix& costMatrix)
+void ObjectMatcher::GenerateCostMatrix(const std::vector<ObjInfo>& objsa,const std::vector<ObjInfo>& objsb,const std::pair<int,int>& appendInfo,hungarian::Int2DMatrix& costMatrix)
 {
     for(auto ait=objsa.begin();ait!=objsa.end();ait++)
     {
-        std::vector<float> a2bs;
+        std::vector<int> a2bs;
         for(auto bit=objsb.begin();bit!=objsb.end();bit++)
         {
             a2bs.push_back(CountObjCost(*ait,*bit));
@@ -89,7 +90,7 @@ void ObjectMatcher::GenerateCostMatrix(const std::vector<ObjInfo>& objsa,const s
     }
     if(appendInfo.first==2)
     {
-        std::vector<float> appendRow;
+        std::vector<int> appendRow;
         for(auto i=0;i<objsb.size();i++)
         {appendRow.push_back(APPEND_COST);}
         for(auto i=0;i<appendInfo.second;i++)
@@ -107,13 +108,14 @@ float ObjectMatcher::CountObjCost(const ObjInfo& obj1,const ObjInfo& obj2)
     float obj2_y_c=(obj2.pos[1]+obj2.pos[3])/2.0;
 
     float distance=std::sqrt(std::pow((obj2_x_c-obj1_x_c),2)+std::pow((obj2_y_c-obj1_y_c),2));
+    int distance_t=static_cast<int>(std::round(distance));
 
     if(obj1.label!=obj2.label)
     {
-        return -(distance+LABEL_COST);
+        return -(distance_t+LABEL_COST);
     }
     else
-    {return -distance;}
+    {return -distance_t;}
 }
 
 }

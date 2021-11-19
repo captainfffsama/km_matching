@@ -1,10 +1,10 @@
 #include "hungarian.hpp"
-#include <cfloat>
-#include <cmath>
+#include <math.h>
+#include <limits.h>
 
 namespace hungarian {
 
-float Hungarian::Solve(const std::vector<std::vector<float>> &c_m, std::vector<int> &matchResult)
+int Hungarian::Solve(const Int2DMatrix &c_m, std::vector<int> &matchResult)
 {
     costMatrix=c_m;
     ptPairNum=costMatrix.size();
@@ -34,7 +34,7 @@ float Hungarian::Solve(const std::vector<std::vector<float>> &c_m, std::vector<i
             if(DFS(x_idx))
             {break;}
 
-            float d {FLT_MAX};
+            int d {INT_MAX};
             for(auto xit=xpts.begin();xit!=xpts.end();++xit)
             {
                 if((*xit).isVisit)
@@ -49,8 +49,8 @@ float Hungarian::Solve(const std::vector<std::vector<float>> &c_m, std::vector<i
                 }
             }
 
-            if(FLT_MAX==d)
-            {return FLT_MAX;}
+            if(INT_MAX==d)
+            {return INT_MAX;}
 
             for(auto xit=xpts.begin();xit!=xpts.end();++xit)
             {
@@ -67,7 +67,7 @@ float Hungarian::Solve(const std::vector<std::vector<float>> &c_m, std::vector<i
         }
     }
 
-    float totalCost {0};
+    int totalCost {0};
     for(auto xit=xpts.begin();xit!=xpts.end();++xit)
     {
         totalCost+=costMatrix[(*xit).idx][(*xit).matchPointIdx];
@@ -80,7 +80,7 @@ void Hungarian::InitVertexWeight()
 {
     for(int i=0;i<ptPairNum;++i)
     {
-        float maxWeight {FLT_MIN};
+        int maxWeight {INT_MIN};
         for(int j=0;j<ptPairNum;++j)
         {
             maxWeight=std::max(maxWeight,costMatrix[i][j]);
@@ -100,7 +100,8 @@ bool Hungarian::DFS(int x_idx)
     {
         if(!ypts[i].isVisit)
         {
-            if(std::abs((xpts[x_idx].weight+ypts[i].weight)-costMatrix[xpts[x_idx].idx][ypts[i].idx])<0.01)
+            
+            if((xpts[x_idx].weight+ypts[i].weight)==costMatrix[xpts[x_idx].idx][ypts[i].idx])
             {
                 ypts[i].isVisit=true;
                 if(-1==ypts[i].matchPointIdx|| DFS(ypts[i].matchPointIdx))

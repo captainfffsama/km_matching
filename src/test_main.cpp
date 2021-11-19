@@ -19,6 +19,7 @@ int main()
     object_match::ObjectMatcher solver;
     std::vector<int> nomath;
     std::vector<std::pair<int,int>> result;
+    std::cout<<"star"<<std::endl;
     int flag=solver.MatchObject(objas,objbs,result,nomath);
 
     std::cout<<"flag:"<<flag<<std::endl;
