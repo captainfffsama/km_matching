@@ -11,7 +11,7 @@ namespace hungarian
         matchResult.clear();
         if (ptPairNum < 1 || (c_m[1].size() != ptPairNum))
         {
-            std::cout << "ERROR:矩阵不符合要求,可能不是方阵" << std::endl;
+            std::cout << "ERROR: Matrix maybe not square or is empty!!!" << std::endl;
             return 0;
         }
         xpts.clear();
