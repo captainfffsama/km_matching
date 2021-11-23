@@ -5,40 +5,40 @@
 #include <ostream>
 #include <vector>
 
-
-namespace hungarian {
-
-struct PointInfo
+namespace hungarian
 {
-    bool isVisit;
-    int weight;
-    int matchPointIdx;
-    int idx;
 
-    PointInfo(bool is_v=false,int w=0,int mPI=-1,int indix=-1):isVisit(is_v),weight(w),matchPointIdx(mPI),idx(indix) {}
-};
+    struct PointInfo
+    {
+        bool isVisit;
+        int weight;
+        int matchPointIdx;
+        int idx;
 
-using PointsInfoVec=std::vector<PointInfo>;
-using Int2DMatrix=std::vector<std::vector<int>>;
+        PointInfo(bool is_v = false, int w = 0, int mPI = -1, int indix = -1) : isVisit(is_v), weight(w), matchPointIdx(mPI), idx(indix) {}
+    };
 
-void clearPointsVisitFlag(PointsInfoVec& pts);
+    using PointsInfoVec = std::vector<PointInfo>;
+    using Int2DMatrix = std::vector<std::vector<int>>;
 
-class Hungarian
-{
-public:
-    explicit Hungarian() {}
-    int Solve(const Int2DMatrix& c_m,std::vector<int>& matchResult); 
-private:
-    int ptPairNum;
-    PointsInfoVec xpts;
-    PointsInfoVec ypts;
-    Int2DMatrix costMatrix;
+    void clearPointsVisitFlag(PointsInfoVec &pts);
 
-    void InitVertexWeight();
+    class Hungarian
+    {
+    public:
+        explicit Hungarian() {}
+        int Solve(const Int2DMatrix &c_m, std::vector<int> &matchResult);
 
-    bool DFS(int x_idx);
-};
+    private:
+        int ptPairNum;
+        PointsInfoVec xpts;
+        PointsInfoVec ypts;
+        Int2DMatrix costMatrix;
 
+        void InitVertexWeight();
+
+        bool DFS(int x_idx);
+    };
 
 }
 

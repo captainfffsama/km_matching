@@ -5,10 +5,9 @@
 
 int main()
 {
-    auto hungarianSolver=hungarian::Hungarian();
+    auto hungarianSolver = hungarian::Hungarian();
 
-
-    hungarian::Flt2DMatrix costMatrix = {{10, 19, 8, 15},
+    hungarian::Int2DMatrix costMatrix = {{10, 19, 8, 15},
                                          {10, 18, 7, 17},
                                          {13, 16, 9, 14},
                                          {12, 19, 8, 18}};
@@ -16,12 +15,11 @@ int main()
     //                                      {1, 0, 0, 1},
     //                                      {1, 1, 1, 0},
     //                                      {1, 0, 1, 1}};
-    // 
+    //
     std::vector<int> result;
-    float cost=hungarianSolver.Solve(costMatrix,result);
+    float cost = hungarianSolver.Solve(costMatrix, result);
     debug::showMatchingResult(result);
-    std::cout<<"cost is:"<<cost<<std::endl;
-    
+    std::cout << "cost is:" << cost << std::endl;
 
     return 0;
 }
