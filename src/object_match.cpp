@@ -30,41 +30,17 @@ int ObjectMatcher::MatchObject(const std::vector<ObjInfo> &objsA, const std::vec
 
     std::vector<int> kmReuslt;
     int cost=matcher.Solve(costMatrix,kmReuslt);
-    debug::showMatrix(costMatrix);
+    // debug::showMatrix(costMatrix);
+
     
-    switch (appendInfo.first) {
-        //A 多了
-        case 1:
-            {
-                for(auto i=0;i<kmReuslt.size();++i)
-                {
-                    if(kmReuslt[i]>=objsB.size())
-                    {
-                        noMatchObjs.push_back(i);
-                    }
-                    else
-                    {
-                        A2BMatchResult.push_back(std::make_pair(i,kmReuslt[i]));
-                    }
-                }
-                break;
-            }
-        //B 多了
-        case 2:
-            {
-                for(auto i=0;i<kmReuslt.size();++i)
-                {
-                    if(i>=objsA.size())
-                    {noMatchObjs.push_back(kmReuslt[i]);}
-                    else
-                    {
-                        A2BMatchResult.push_back(std::make_pair(i,kmReuslt[i]));
-                    }
-                }
-                break;
-            }
-        default:
-            break;
+    for(auto i=0;i<kmReuslt.size();++i)
+    {
+        if(kmReuslt[i]>=objsB.size())
+        {noMatchObjs.push_back(i);continue;}
+        if(i>=objsA.size())
+        {noMatchObjs.push_back(kmReuslt[i]);continue;}
+        A2BMatchResult.push_back(std::make_pair(i,kmReuslt[i]));
+
     }
     return appendInfo.first;
     
