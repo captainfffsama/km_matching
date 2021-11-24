@@ -9,7 +9,7 @@ namespace hungarian
         costMatrix = c_m;
         ptPairNum = costMatrix.size();
         matchResult.clear();
-        if (ptPairNum < 1 || (c_m[1].size() != ptPairNum))
+        if (ptPairNum < 1 || (c_m[0].size() != ptPairNum))
         {
             std::cout << "ERROR: Matrix maybe not square or is empty!!!" << std::endl;
             return 0;
